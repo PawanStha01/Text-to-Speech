@@ -999,6 +999,95 @@
     
     // Rest of your existing code...
 });
+        document.addEventListener('DOMContentLoaded', function() {
+    // Text-to-Speech elements
+    const textInput = document.getElementById('textInput');
+    const playBtn = document.getElementById('playBtn');
+    const voiceSelect = document.getElementById('voiceSelect');
+    // ... other element references
+
+    let speechSynthesis = window.speechSynthesis;
+    let voices = [];
+    let isVoicesLoaded = false;
+    let voiceLoadAttempts = 0;
+    const MAX_VOICE_LOAD_ATTEMPTS = 10;
+
+    // Android-specific voice loading solution
+    function loadVoices() {
+        voices = speechSynthesis.getVoices();
+        
+        // Check if we got voices
+        if (voices.length > 0) {
+            isVoicesLoaded = true;
+            populateVoiceList();
+            return;
+        }
+
+        // For Android - try multiple times
+        if (voiceLoadAttempts < MAX_VOICE_LOAD_ATTEMPTS) {
+            voiceLoadAttempts++;
+            setTimeout(loadVoices, 500);
+        } else {
+            console.error("Failed to load voices after multiple attempts");
+            voiceSelect.innerHTML = '<option value="">No voices available</option>';
+        }
+    }
+
+    function populateVoiceList() {
+        voiceSelect.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.textContent = 'Select a voice...';
+        defaultOption.value = '';
+        voiceSelect.appendChild(defaultOption);
+        
+        // Filter and add available voices
+        voices.forEach((voice, index) => {
+            // Skip voices that don't match our language needs
+            if (!voice.lang.includes('en') && !voice.lang.includes('hi')) { // English and Hindi examples
+                return;
+            }
+            
+            const option = document.createElement('option');
+            option.textContent = `${voice.name} (${voice.lang})`;
+            option.value = index;
+            voiceSelect.appendChild(option);
+        });
+
+        // Enable UI elements now that voices are loaded
+        playBtn.disabled = false;
+    }
+
+    // Initial voice loading - different approaches for different platforms
+    if (/Android/i.test(navigator.userAgent)) {
+        // Android needs special handling
+        voiceSelect.innerHTML = '<option value="">Loading voices...</option>';
+        playBtn.disabled = true;
+        
+        // Start the voice loading process
+        setTimeout(loadVoices, 200);
+        
+        // Some Android devices need a dummy utterance to trigger voice loading
+        const dummyUtterance = new SpeechSynthesisUtterance('');
+        dummyUtterance.volume = 0; // Silent
+        speechSynthesis.speak(dummyUtterance);
+    } else {
+        // Standard browsers
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices(); // Initial load
+    }
+
+    // Rest of your TTS functionality...
+    playBtn.addEventListener('click', function() {
+        if (!isVoicesLoaded) {
+            alert('Voices are still loading. Please wait a moment and try again.');
+            return;
+        }
+        
+        // Your play functionality...
+    });
+});
     </script>
 </body>
 </html>
