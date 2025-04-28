@@ -765,6 +765,240 @@
             // Initialize all AdMob ads
             (adsbygoogle = window.adsbygoogle || []).push({});
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+    // Text-to-Speech functionality
+    const textInput = document.getElementById('textInput');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const rateSelect = document.getElementById('rateSelect');
+    const pitchSelect = document.getElementById('pitchSelect');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const voicePreviews = document.getElementById('voicePreviews');
+    
+    let speechSynthesis = window.speechSynthesis;
+    let voices = [];
+    let utterance = null;
+    let isPlaying = false;
+    let isPaused = false;
+    
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Load voices with retry for mobile
+    function loadVoices() {
+        voices = speechSynthesis.getVoices();
+        
+        // Mobile devices often need a retry
+        if (voices.length === 0 && isMobile) {
+            setTimeout(loadVoices, 200);
+            return;
+        }
+        
+        voiceSelect.innerHTML = '';
+        voicePreviews.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.textContent = 'Select a voice...';
+        defaultOption.value = '';
+        voiceSelect.appendChild(defaultOption);
+        
+        // Add voice options
+        voices.forEach((voice, index) => {
+            const option = document.createElement('option');
+            option.textContent = `${voice.name} (${voice.lang})`;
+            option.value = index;
+            voiceSelect.appendChild(option);
+            
+            // Add voice preview buttons
+            const previewBtn = document.createElement('button');
+            previewBtn.className = 'btn btn-sm btn-outline-primary voice-selector me-2 mb-2';
+            previewBtn.innerHTML = `<i class="fas fa-volume-up me-1"></i> ${voice.lang}`;
+            previewBtn.title = voice.name;
+            previewBtn.dataset.voiceIndex = index;
+            
+            previewBtn.addEventListener('click', function() {
+                // Highlight selected voice
+                document.querySelectorAll('.voice-selector').forEach(btn => {
+                    btn.classList.remove('active', 'btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                });
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('active', 'btn-primary');
+                
+                // Set the voice in dropdown
+                voiceSelect.value = this.dataset.voiceIndex;
+                
+                // Play preview
+                playPreview(voices[this.dataset.voiceIndex]);
+            });
+            
+            voicePreviews.appendChild(previewBtn);
+        });
+    }
+    
+    // Play preview with error handling
+    function playPreview(voice) {
+        try {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+            
+            const previewText = "This is a preview of this voice";
+            const previewUtterance = new SpeechSynthesisUtterance(previewText);
+            previewUtterance.voice = voice;
+            previewUtterance.rate = parseFloat(rateSelect.value);
+            previewUtterance.pitch = parseFloat(pitchSelect.value);
+            previewUtterance.volume = parseFloat(volumeSlider.value);
+            
+            // Add error handling
+            previewUtterance.onerror = function(event) {
+                console.error('SpeechSynthesis error:', event.error);
+                resetSpeechControls();
+            };
+            
+            speechSynthesis.speak(previewUtterance);
+        } catch (error) {
+            console.error('Error playing preview:', error);
+            alert('Error playing voice preview. Please try again.');
+        }
+    }
+    
+    // Reset all speech controls to default state
+    function resetSpeechControls() {
+        isPlaying = false;
+        isPaused = false;
+        playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Play';
+        playBtn.classList.remove('playing');
+        pauseBtn.disabled = true;
+        stopBtn.disabled = true;
+    }
+    
+    // Initialize voices
+    speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices(); // Initial load
+    
+    // Play speech with proper state management
+    playBtn.addEventListener('click', function() {
+        try {
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('Please enter some text to convert to speech.');
+                return;
+            }
+            
+            // Handle pause/resume
+            if (isPaused) {
+                speechSynthesis.resume();
+                isPaused = false;
+                playBtn.innerHTML = '<i class="fas fa-pause me-1"></i> Pause';
+                pauseBtn.disabled = false;
+                return;
+            }
+            
+            // Cancel any current speech
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+            }
+            
+            utterance = new SpeechSynthesisUtterance(text);
+            
+            if (voiceSelect.value) {
+                utterance.voice = voices[voiceSelect.value];
+            }
+            
+            utterance.rate = parseFloat(rateSelect.value);
+            utterance.pitch = parseFloat(pitchSelect.value);
+            utterance.volume = parseFloat(volumeSlider.value);
+            
+            // Event handlers with proper state management
+            utterance.onstart = function() {
+                isPlaying = true;
+                isPaused = false;
+                playBtn.innerHTML = '<i class="fas fa-pause me-1"></i> Pause';
+                playBtn.classList.add('playing');
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+            };
+            
+            utterance.onend = function() {
+                resetSpeechControls();
+            };
+            
+            utterance.onpause = function() {
+                isPlaying = false;
+                isPaused = true;
+                playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Resume';
+                playBtn.classList.remove('playing');
+                pauseBtn.disabled = true;
+            };
+            
+            utterance.onerror = function(event) {
+                console.error('SpeechSynthesis error:', event.error);
+                resetSpeechControls();
+                alert('Error: ' + event.error);
+            };
+            
+            speechSynthesis.speak(utterance);
+        } catch (error) {
+            console.error('Error in play:', error);
+            resetSpeechControls();
+            alert('An error occurred. Please try again.');
+        }
+    });
+    
+    // Pause speech with proper state management
+    pauseBtn.addEventListener('click', function() {
+        try {
+            if (speechSynthesis.speaking && !isPaused) {
+                speechSynthesis.pause();
+                isPaused = true;
+                playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Resume';
+                pauseBtn.disabled = true;
+            }
+        } catch (error) {
+            console.error('Error pausing:', error);
+            resetSpeechControls();
+        }
+    });
+    
+    // Stop speech with proper cleanup
+    stopBtn.addEventListener('click', function() {
+        try {
+            if (speechSynthesis.speaking || isPaused) {
+                speechSynthesis.cancel();
+                resetSpeechControls();
+            }
+        } catch (error) {
+            console.error('Error stopping:', error);
+            resetSpeechControls();
+        }
+    });
+    
+    // Mobile-specific optimizations
+    if (isMobile) {
+        // Increase touch target sizes
+        document.querySelectorAll('button').forEach(btn => {
+            btn.style.minHeight = '44px';
+            btn.style.padding = '10px 15px';
+        });
+        
+        // Prevent zooming on input focus
+        textInput.addEventListener('focus', function() {
+            document.querySelector('meta[name="viewport"]').content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+        });
+        
+        textInput.addEventListener('blur', function() {
+            document.querySelector('meta[name="viewport"]').content = 'width=device-width, initial-scale=1.0';
+        });
+    }
+    
+    // Rest of your existing code...
+});
     </script>
 </body>
 </html>
