@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Speech Converter | PDE Tools</title>
+    <meta name="description" content="Free online text to speech converter that supports multiple voices and languages. Convert any text to natural sounding speech instantly.">
+    <meta name="keywords" content="text to speech, TTS, speech synthesis, voice generator, online converter, PDE Tools">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AdMob Ads Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-app-pub-8031048940521226/7365727381" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ff6b6b;
+            --dark-color: #343a40;
+            --light-color: #ffffff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7ff;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: var(--light-color);
+        }
+        
+        .tool-card {
+            background: var(--light-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tool-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a56d4;
+            border-color: #3a56d4;
+        }
+        
+        .btn-accent {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background-color: #e05555;
+            border-color: #e05555;
+            color: white;
+        }
+        
+        #textInput {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .voice-selector {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .voice-selector:hover {
+            background-color: rgba(74, 107, 255, 0.1);
+        }
+        
+        .voice-selector.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .settings-panel {
+            background-color: var(--secondary-color);
+            border-radius: 8px;
+            padding: 15px;
+        }
+        
+        .footer {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            padding: 30px 0;
+        }
+        
+        .footer a {
+            color: #adb5bd;
+        }
+        
+        .footer a:hover {
+            color: var(--light-color);
+            text-decoration: none;
+        }
+        
+        .ad-container {
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .ad-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        @media (max-width: 768px) {
+            .voice-selector {
+                margin-bottom: 10px;
+            }
+            
+            .ad-container {
+                padding: 8px;
+            }
+        }
+        
+        /* Animation for play button */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .playing {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Dark mode toggle */
+        .dark-mode {
+            background-color: #1a1a2e;
+            color: #e6e6e6;
+        }
+        
+        .dark-mode .tool-card {
+            background-color: #16213e;
+            color: #e6e6e6;
+        }
+        
+        .dark-mode #textInput {
+            background-color: #0f3460;
+            color: #e6e6e6;
+            border-color: #1a1a2e;
+        }
+        
+        .dark-mode .settings-panel {
+            background-color: #0f3460;
+        }
+        
+        .dark-mode .form-control, .dark-mode .form-select {
+            background-color: #0f3460;
+            color: #e6e6e6;
+            border-color: #1a1a2e;
+        }
+        
+        .dark-mode .ad-container {
+            background-color: #0f3460;
+            border: 1px solid #1a1a2e;
+        }
+        
+        .dark-mode .ad-label {
+            color: #adb5bd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dynamic Header -->
+    <header id="dynamic-header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <i class="fas fa-tools me-2"></i>PDE Tools
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="index.html">Home</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                Categories
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#">Image Tools</a></li>
+                                <li><a class="dropdown-item" href="#">SEO Tools</a></li>
+                                <li><a class="dropdown-item" href="#">Calculators</a></li>
+                                <li><a class="dropdown-item" href="#">Developer Tools</a></li>
+                                <li><a class="dropdown-item" href="#">Text Tools</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="text-to-speech.html">Text to Speech</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex">
+                        <div class="input-group">
+                            <input class="form-control" type="search" placeholder="Search tools..." id="searchInput">
+                            <button class="btn btn-outline-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <button class="btn btn-sm btn-outline-secondary" id="darkModeToggle">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Top Ad Banner -->
+                <div class="ad-container mb-4">
+                    <div class="ad-label">Advertisement</div>
+                    <!-- AdMob Ad Unit -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-app-pub-8031048940521226/7647964269"
+                         data-ad-slot="YOUR_TOP_BANNER_AD_SLOT"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                
+                <!-- Tool Card -->
+                <div class="tool-card mb-4">
+                    <div class="tool-header">
+                        <h2 class="h4 mb-0"><i class="fas fa-comment-dots me-2"></i>Text to Speech Converter</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label for="textInput" class="form-label">Enter your text below:</label>
+                            <textarea class="form-control" id="textInput" rows="6" placeholder="Type or paste your text here..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex flex-wrap justify-content-between mb-4">
+                            <div class="mb-2">
+                                <button id="playBtn" class="btn btn-primary me-2">
+                                    <i class="fas fa-play me-1"></i> Play
+                                </button>
+                                <button id="pauseBtn" class="btn btn-secondary me-2" disabled>
+                                    <i class="fas fa-pause me-1"></i> Pause
+                                </button>
+                                <button id="stopBtn" class="btn btn-danger" disabled>
+                                    <i class="fas fa-stop me-1"></i> Stop
+                                </button>
+                            </div>
+                            <div>
+                                <button id="downloadBtn" class="btn btn-success">
+                                    <i class="fas fa-download me-1"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-panel mb-4">
+                            <h5 class="mb-3"><i class="fas fa-cog me-2"></i>Settings</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="voiceSelect" class="form-label">Voice:</label>
+                                    <select class="form-select" id="voiceSelect">
+                                        <option value="">Loading voices...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="rateSelect" class="form-label">Speed:</label>
+                                    <select class="form-select" id="rateSelect">
+                                        <option value="0.5">0.5x</option>
+                                        <option value="0.75">0.75x</option>
+                                        <option value="1" selected>1x (Normal)</option>
+                                        <option value="1.25">1.25x</option>
+                                        <option value="1.5">1.5x</option>
+                                        <option value="2">2x</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="pitchSelect" class="form-label">Pitch:</label>
+                                    <select class="form-select" id="pitchSelect">
+                                        <option value="0.5">Low</option>
+                                        <option value="1" selected>Normal</option>
+                                        <option value="1.5">High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Volume:</label>
+                                    <input type="range" class="form-range" min="0" max="1" step="0.1" id="volumeSlider" value="1">
+                                    <div class="d-flex justify-content-between">
+                                        <small>0%</small>
+                                        <small>50%</small>
+                                        <small>100%</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Preview Voices:</label>
+                                    <div class="d-flex flex-wrap" id="voicePreviews">
+                                        <!-- Voice preview buttons will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Tip:</strong> You can select different voices and adjust speed/pitch to customize the speech output.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Middle Ad Banner -->
+                <div class="ad-container mb-4">
+                    <div class="ad-label">Advertisement</div>
+                    <!-- AdMob Ad Unit -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-app-pub-8031048940521226/2043513289"
+                         data-ad-slot="YOUR_MIDDLE_BANNER_AD_SLOT"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                
+                <!-- Related Tools -->
+                <div class="tool-card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-link me-2"></i>Related Tools</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <a href="#" class="text-decoration-none">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-font fa-2x mb-2 text-primary"></i>
+                                            <h6 class="card-subtitle mb-2">Word Counter</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="#" class="text-decoration-none">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-spell-check fa-2x mb-2 text-primary"></i>
+                                            <h6 class="card-subtitle mb-2">Grammar Checker</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <a href="#" class="text-decoration-none">
+                                    <div class="card h-100">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-microphone fa-2x mb-2 text-primary"></i>
+                                            <h6 class="card-subtitle mb-2">Speech to Text</h6>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <!-- Sidebar Top Ad -->
+                <div class="ad-container mb-4">
+                    <div class="ad-label">Advertisement</div>
+                    <!-- AdMob Ad Unit -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-app-pub-8031048940521226/2880160228"
+                         data-ad-slot="YOUR_SIDEBAR_TOP_AD_SLOT"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                
+                <!-- Quick Tools -->
+                <div class="tool-card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-bolt me-2"></i>Quick Tools</h5>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-image me-2"></i> Image Converter
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-file-pdf me-2"></i> PDF Tools
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-calculator me-2"></i> Calculator
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-code me-2"></i> Code Beautifier
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-link me-2"></i> URL Shortener
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar Bottom Ad -->
+                <div class="ad-container mb-4">
+                    <div class="ad-label">Advertisement</div>
+                    <!-- AdMob Ad Unit -->
+                    <ins class="adsbygoogle"
+                         style="display:block"
+                         data-ad-client="ca-app-pub-8031048940521226/7365727381"
+                         data-ad-slot="YOUR_SIDEBAR_BOTTOM_AD_SLOT"
+                         data-ad-format="auto"
+                         data-full-width-responsive="true"></ins>
+                    <script>
+                         (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                </div>
+                
+                <!-- Recent Tools -->
+                <div class="tool-card">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-history me-2"></i>Recently Used</h5>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-text-width me-2"></i> Character Counter
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-hashtag me-2"></i> Password Generator
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action">
+                                <i class="fas fa-qrcode me-2"></i> QR Code Generator
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Dynamic Footer -->
+    <footer id="dynamic-footer" class="footer">
+        <div class="container">
+            <!-- Footer Top Ad -->
+            <div class="ad-container mb-4">
+                <div class="ad-label">Advertisement</div>
+                <!-- AdMob Ad Unit -->
+                <ins class="adsbygoogle"
+                     style="display:block"
+                     data-ad-client="ca-pub-8031048940521226"
+                     data-ad-slot="YOUR_FOOTER_AD_SLOT"
+                     data-ad-format="auto"
+                     data-full-width-responsive="true"></ins>
+                <script>
+                     (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5 class="mb-3">PDE Tools</h5>
+                    <p>Your one-stop solution for all online tools. Free, fast, and reliable tools for everyday needs.</p>
+                    <div class="social-icons">
+                        <a href="#" class="me-2"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="me-2"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="mb-3">Categories</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">Image Tools</a></li>
+                        <li class="mb-2"><a href="#">Text Tools</a></li>
+                        <li class="mb-2"><a href="#">SEO Tools</a></li>
+                        <li class="mb-2"><a href="#">Developer Tools</a></li>
+                        <li class="mb-2"><a href="#">Calculators</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="mb-3">Company</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#">About Us</a></li>
+                        <li class="mb-2"><a href="#">Contact</a></li>
+                        <li class="mb-2"><a href="#">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5 class="mb-3">Newsletter</h5>
+                    <p>Subscribe to our newsletter for updates and new tools.</p>
+                    <form class="mb-3">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email">
+                            <button class="btn btn-primary" type="button">Subscribe</button>
+                        </div>
+                    </form>
+                    <p class="small mb-0">© 2023 <strong>Pawan Debian Empire (PDE)</strong>. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Text-to-Speech functionality
+            const textInput = document.getElementById('textInput');
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const voiceSelect = document.getElementById('voiceSelect');
+            const rateSelect = document.getElementById('rateSelect');
+            const pitchSelect = document.getElementById('pitchSelect');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const voicePreviews = document.getElementById('voicePreviews');
+            
+            let speechSynthesis = window.speechSynthesis;
+            let voices = [];
+            let utterance = null;
+            let isPlaying = false;
+            
+            // Load voices
+            function loadVoices() {
+                voices = speechSynthesis.getVoices();
+                voiceSelect.innerHTML = '';
+                voicePreviews.innerHTML = '';
+                
+                // Add default option
+                const defaultOption = document.createElement('option');
+                defaultOption.textContent = 'Select a voice...';
+                defaultOption.value = '';
+                voiceSelect.appendChild(defaultOption);
+                
+                // Add voice options
+                voices.forEach((voice, index) => {
+                    const option = document.createElement('option');
+                    option.textContent = `${voice.name} (${voice.lang})`;
+                    option.value = index;
+                    voiceSelect.appendChild(option);
+                    
+                    // Add voice preview buttons
+                    const previewBtn = document.createElement('button');
+                    previewBtn.className = 'btn btn-sm btn-outline-primary voice-selector me-2 mb-2';
+                    previewBtn.innerHTML = `<i class="fas fa-volume-up me-1"></i> ${voice.lang}`;
+                    previewBtn.title = voice.name;
+                    previewBtn.dataset.voiceIndex = index;
+                    
+                    previewBtn.addEventListener('click', function() {
+                        // Highlight selected voice
+                        document.querySelectorAll('.voice-selector').forEach(btn => {
+                            btn.classList.remove('active', 'btn-primary');
+                            btn.classList.add('btn-outline-primary');
+                        });
+                        this.classList.remove('btn-outline-primary');
+                        this.classList.add('active', 'btn-primary');
+                        
+                        // Set the voice in dropdown
+                        voiceSelect.value = this.dataset.voiceIndex;
+                        
+                        // Play preview
+                        playPreview(voices[this.dataset.voiceIndex]);
+                    });
+                    
+                    voicePreviews.appendChild(previewBtn);
+                });
+            }
+            
+            // Play preview
+            function playPreview(voice) {
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+                
+                const previewText = "This is a preview of this voice";
+                const previewUtterance = new SpeechSynthesisUtterance(previewText);
+                previewUtterance.voice = voice;
+                previewUtterance.rate = parseFloat(rateSelect.value);
+                previewUtterance.pitch = parseFloat(pitchSelect.value);
+                previewUtterance.volume = parseFloat(volumeSlider.value);
+                
+                speechSynthesis.speak(previewUtterance);
+            }
+            
+            // Initialize voices
+            speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices(); // In case voices are already loaded
+            
+            // Play speech
+            playBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    speechSynthesis.resume();
+                    playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Play';
+                    pauseBtn.disabled = false;
+                    isPlaying = false;
+                    return;
+                }
+                
+                const text = textInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text to convert to speech.');
+                    return;
+                }
+                
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+                
+                utterance = new SpeechSynthesisUtterance(text);
+                
+                if (voiceSelect.value) {
+                    utterance.voice = voices[voiceSelect.value];
+                }
+                
+                utterance.rate = parseFloat(rateSelect.value);
+                utterance.pitch = parseFloat(pitchSelect.value);
+                utterance.volume = parseFloat(volumeSlider.value);
+                
+                utterance.onstart = function() {
+                    isPlaying = true;
+                    playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Resume';
+                    playBtn.classList.add('playing');
+                    pauseBtn.disabled = false;
+                    stopBtn.disabled = false;
+                };
+                
+                utterance.onend = function() {
+                    isPlaying = false;
+                    playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Play';
+                    playBtn.classList.remove('playing');
+                    pauseBtn.disabled = true;
+                    stopBtn.disabled = true;
+                };
+                
+                utterance.onpause = function() {
+                    isPlaying = false;
+                    playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Resume';
+                    playBtn.classList.remove('playing');
+                };
+                
+                speechSynthesis.speak(utterance);
+            });
+            
+            // Pause speech
+            pauseBtn.addEventListener('click', function() {
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.pause();
+                    pauseBtn.disabled = true;
+                    playBtn.disabled = false;
+                }
+            });
+            
+            // Stop speech
+            stopBtn.addEventListener('click', function() {
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                    isPlaying = false;
+                    playBtn.innerHTML = '<i class="fas fa-play me-1"></i> Play';
+                    playBtn.classList.remove('playing');
+                    pauseBtn.disabled = true;
+                    stopBtn.disabled = true;
+                }
+            });
+            
+            // Download as MP3 (simulated - would require server-side processing in real implementation)
+            downloadBtn.addEventListener('click', function() {
+                const text = textInput.value.trim();
+                if (!text) {
+                    alert('Please enter some text to download as speech.');
+                    return;
+                }
+                
+                // In a real implementation, this would send the text to a server to convert to MP3
+                alert('In a full implementation, this would download the speech as an MP3 file. This demo simulates the behavior.');
+                
+                // Simulate download (would be replaced with actual download logic)
+                const blob = new Blob([`This would be the audio file for: ${text}`], { type: 'audio/mpeg' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'speech.mp3';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            // Dark mode toggle
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                    localStorage.setItem('darkMode', 'enabled');
+                } else {
+                    darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                    localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+            
+            // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    alert('In a full implementation, this would search for tools. Search term: ' + this.value);
+                    // In a real implementation, this would filter tools on the homepage or redirect to search results
+                }
+            });
+            
+            // Responsive adjustments
+            function handleResize() {
+                // Any responsive adjustments can go here
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize();
+            
+            // Initialize all AdMob ads
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        });
+    </script>
+</body>
+</html>
